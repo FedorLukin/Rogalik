@@ -71,16 +71,16 @@ class Game:
                 self.can_shoot = True
 
     def setup(self):
-        map = load_pygame('C:/Users/quartz/Documents/maps/рогалик.tmx')
+        map = load_pygame('./tiles/рогалик.tmx')
 
         for x, y, image in map.get_layer_by_name('ground').tiles():
-            Sprite((x * TILE_SIZE,y * TILE_SIZE), image, self.all_sprites)
+            Sprite((x * TILE_SIZE,y * TILE_SIZE), pygame.transform.scale(image, (32, 32)), self.all_sprites)
 
         for x, y, image in map.get_layer_by_name('walls').tiles():
-            CollisionSprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
+            CollisionSprite((x * TILE_SIZE, y * TILE_SIZE), pygame.transform.scale(image, (32, 32)), (self.all_sprites, self.collision_sprites))
 
         for obj in map.get_layer_by_name('trees'):
-            CollisionSprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
+            CollisionSprite((obj.x * 2, obj.y * 2), pygame.transform.scale(obj.image, (32, 32)), (self.all_sprites, self.collision_sprites))
         
         # for obj in map.get_layer_by_name('walls'):
         #     CollisionSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), self.collision_sprites)
