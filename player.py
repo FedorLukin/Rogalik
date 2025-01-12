@@ -11,11 +11,11 @@ class Player(pygame.sprite.Sprite):
     
         # movement 
         self.direction = pygame.Vector2()
-        self.speed = 400
+        self.speed = 340
         self.collision_sprites = collision_sprites
 
     def load_images(self):
-        self.frames = {'left': [], 'right': [], 'up': [], 'down': [], 'stay': []}
+        self.frames = {'left': [], 'right': [], 'up': [], 'down': [], 'stay': [], 'down-right': []}
 
         for state in self.frames.keys():
             for folder_path, sub_folders, file_names in walk(join('images', 'player', state)):
@@ -52,10 +52,11 @@ class Player(pygame.sprite.Sprite):
         # get state 
         if self.direction.x != 0:
             self.state = 'right' if self.direction.x > 0 else 'left'
-        if self.direction.y != 0:
+        elif self.direction.y != 0:
             self.state = 'down' if self.direction.y > 0 else 'up'
-        if self.direction.x == 0 and self.direction.y == 0:
+        elif self.direction.x == 0 and self.direction.y == 0:
             self.state = 'stay'
+ 
 
         # animate
         self.frame_index = self.frame_index + 5 * dt
