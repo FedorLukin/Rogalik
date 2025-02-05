@@ -1,26 +1,27 @@
-from settings import * 
+import pygame
+from os import walk
+from os.path import join
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, collision_sprites):
         super().__init__(groups)
         self.load_images()
         self.state, self.frame_index = 'right', 0
-        self.image = pygame.image.load(join('images', 'player', 'down', '0.png')).convert_alpha()
-        self.rect = self.image.get_rect(center = pos)
+        self.image = pygame.image.load('images/player/down/0.png').convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
         self.hitbox_rect = self.rect.inflate(-5, -5)
-    
-        # movement 
         self.direction = pygame.Vector2()
-        self.speed = 340
+        self.speed = 300
         self.collision_sprites = collision_sprites
 
     def load_images(self):
         self.frames = {'left': [], 'right': [], 'up': [], 'down': [], 'stay': [], 'down-right': []}
 
         for state in self.frames.keys():
-            for folder_path, sub_folders, file_names in walk(join('images', 'player', state)):
+            for folder_path, sub_folders, file_names in walk(f'images/player/{state}'):
                 if file_names:
-                    for file_name in sorted(file_names, key= lambda name: int(name.split('.')[0])):
+                    for file_name in sorted(file_names, key=lambda name: int(name.split('.')[0])):
                         full_path = join(folder_path, file_name)
                         surf = pygame.image.load(full_path).convert_alpha()
                         self.frames[state].append(surf)
@@ -32,33 +33,36 @@ class Player(pygame.sprite.Sprite):
         self.direction = self.direction.normalize() if self.direction else self.direction
 
     def move(self, dt):
-        self.hitbox_rect.x += self.direction.x * self.speed * dt
-        self.collision('horizontal')
-        self.hitbox_rect.y += self.direction.y * self.speed * dt
-        self.collision('vertical')
+        if self.hitbox_rect.x >= 5 and self.direction.x < 0 or self.hitbox_rect.x <= 5100 and self.direction.x > 0:
+            self.hitbox_rect.x += self.direction.x * self.speed * dt
+            self.collision('horizontal')
+        if self.hitbox_rect.y >= 5 and self.direction.y < 0 or self.hitbox_rect.y <= 2855 and self.direction.y > 0:
+            self.hitbox_rect.y += self.direction.y * self.speed * dt
+            self.collision('vertical')
         self.rect.center = self.hitbox_rect.center
 
     def collision(self, direction):
         for sprite in self.collision_sprites:
             if sprite.rect.colliderect(self.hitbox_rect):
                 if direction == 'horizontal':
-                    if self.direction.x > 0: self.hitbox_rect.right = sprite.rect.left
-                    if self.direction.x < 0: self.hitbox_rect.left = sprite.rect.right
+                    if self.direction.x > 0:
+                        self.hitbox_rect.right = sprite.rect.left
+                    if self.direction.x < 0:
+                        self.hitbox_rect.left = sprite.rect.right
                 else:
-                    if self.direction.y < 0: self.hitbox_rect.top = sprite.rect.bottom
-                    if self.direction.y > 0: self.hitbox_rect.bottom = sprite.rect.top
+                    if self.direction.y < 0:
+                        self.hitbox_rect.top = sprite.rect.bottom
+                    if self.direction.y > 0:
+                        self.hitbox_rect.bottom = sprite.rect.top
 
     def animate(self, dt):
-        # get state 
         if self.direction.x != 0:
             self.state = 'right' if self.direction.x > 0 else 'left'
         elif self.direction.y != 0:
             self.state = 'down' if self.direction.y > 0 else 'up'
         elif self.direction.x == 0 and self.direction.y == 0:
             self.state = 'stay'
- 
 
-        # animate
         self.frame_index = self.frame_index + 5 * dt
         self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
 
